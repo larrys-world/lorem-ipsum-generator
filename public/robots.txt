@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lorem-ipsum-generator.vercel.app/sitemap.xml
+Sitemap: https://larrys-world.github.io/lorem-ipsum-generator/sitemap.xml
