@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { LoremIpsum } from 'lorem-ipsum'
 import RelatedTools from '@/components/RelatedTools'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import FAQ from '@/components/FAQ'
 
 type GenerationType = 'paragraphs' | 'words' | 'sentences'
 type LoremStyle = 'classic' | 'hipster' | 'bacon'
@@ -304,8 +303,6 @@ export default function Home() {
             distracted by readable content. It provides a realistic distribution of letters 
             and words that resembles actual text, making it perfect for mockups and prototypes.
           </p>
-
-        <FAQ />
         </div>
       </div>
     </main>
