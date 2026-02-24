@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LoremIpsum } from 'lorem-ipsum'
+import RelatedTools from '@/components/RelatedTools'
 
 type GenerationType = 'paragraphs' | 'words' | 'sentences'
 type LoremStyle = 'classic' | 'hipster' | 'bacon'
@@ -53,41 +54,38 @@ export default function Home() {
         max: 16,
         min: 4
       },
-      words
+      words: words
     })
 
     let result = ''
     
     switch (generationType) {
       case 'paragraphs':
-        const paragraphs = lorem.generateParagraphs(count).split('\n')
-        if (startWithLorem && style === 'classic') {
-          paragraphs[0] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, ' + 
-            paragraphs[0].substring(paragraphs[0].indexOf(' ') + 1)
-        }
-        result = format === 'html' 
-          ? paragraphs.map(p => `<p>${p}</p>`).join('\n\n')
-          : paragraphs.join('\n\n')
-        break
-      case 'words':
-        result = lorem.generateWords(count)
-        if (startWithLorem && style === 'classic') {
-          const words = result.split(' ')
-          if (words.length >= 2) {
-            words[0] = 'Lorem'
-            words[1] = 'ipsum'
-          }
-          result = words.join(' ')
+        result = lorem.generateParagraphs(count)
+        if (format === 'html') {
+          result = result.split('\n').map(p => `<p>${p}</p>`).join('\n')
         }
         break
       case 'sentences':
         result = lorem.generateSentences(count)
-        if (startWithLorem && style === 'classic') {
-          result = 'Lorem ipsum dolor sit amet. ' + result
-        }
+        break
+      case 'words':
+        result = lorem.generateWords(count)
         break
     }
-    
+
+    // Handle "Lorem ipsum..." start
+    if (startWithLorem && style === 'classic') {
+      const loremStart = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+      if (!result.startsWith('Lorem ipsum')) {
+        if (generationType === 'words' && count < 8) {
+          result = loremStart.split(' ').slice(0, count).join(' ')
+        } else {
+          result = result.replace(/^[^.]+/, loremStart)
+        }
+      }
+    }
+
     setOutput(result)
     setCopied(false)
   }
@@ -98,145 +96,187 @@ export default function Home() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err)
+      console.error('Failed to copy text: ', err)
     }
   }
 
-  const getMaxCount = () => {
-    switch (generationType) {
-      case 'paragraphs': return 20
-      case 'words': return 1000
-      case 'sentences': return 100
-    }
+  const downloadText = () => {
+    const blob = new Blob([output], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `lorem-ipsum-${style}-${new Date().getTime()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-4xl font-bold text-center mb-2">Lorem Ipsum Generator</h1>
-        <p className="text-gray-600 text-center mb-8">
-          Generate placeholder text for your designs and mockups
-        </p>
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Lorem Ipsum Generator
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Generate placeholder text for your designs, mockups, and prototypes. 
+            Choose from classic Lorem Ipsum, Hipster Ipsum, or Bacon Ipsum.
+          </p>
+        </header>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Generation Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Generate by
-              </label>
-              <select
-                value={generationType}
-                onChange={(e) => {
-                  setGenerationType(e.target.value as GenerationType)
-                  setCount(3)
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="paragraphs">Paragraphs</option>
-                <option value="words">Words</option>
-                <option value="sentences">Sentences</option>
-              </select>
-            </div>
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {/* Controls */}
+          <div className="md:col-span-1 space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Options</h2>
+              
+              {/* Style Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Style
+                </label>
+                <select
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value as LoremStyle)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="classic">Classic Lorem Ipsum</option>
+                  <option value="hipster">Hipster Ipsum</option>
+                  <option value="bacon">Bacon Ipsum</option>
+                </select>
+              </div>
 
-            {/* Count */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Count: {count}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max={getMaxCount()}
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
+              {/* Generation Type */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Generate
+                </label>
+                <select
+                  value={generationType}
+                  onChange={(e) => setGenerationType(e.target.value as GenerationType)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="paragraphs">Paragraphs</option>
+                  <option value="sentences">Sentences</option>
+                  <option value="words">Words</option>
+                </select>
+              </div>
 
-            {/* Style */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Style
-              </label>
-              <select
-                value={style}
-                onChange={(e) => setStyle(e.target.value as LoremStyle)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="classic">Classic Lorem Ipsum</option>
-                <option value="hipster">Hipster Ipsum</option>
-                <option value="bacon">Bacon Ipsum</option>
-              </select>
-            </div>
-
-            {/* Format */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Format
-              </label>
-              <select
-                value={format}
-                onChange={(e) => setFormat(e.target.value as 'plain' | 'html')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="plain">Plain Text</option>
-                <option value="html">HTML</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Start with Lorem checkbox */}
-          {style === 'classic' && (
-            <div className="mt-4">
-              <label className="flex items-center">
+              {/* Count */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Count: {count}
+                </label>
                 <input
-                  type="checkbox"
-                  checked={startWithLorem}
-                  onChange={(e) => setStartWithLorem(e.target.checked)}
-                  className="mr-2"
+                  type="range"
+                  min="1"
+                  max={generationType === 'words' ? 500 : 10}
+                  value={count}
+                  onChange={(e) => setCount(Number(e.target.value))}
+                  className="w-full"
                 />
-                <span className="text-sm text-gray-700">Start with "Lorem ipsum..."</span>
-              </label>
-            </div>
-          )}
+              </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={generateText}
-            className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
-          >
-            Generate Text
-          </button>
-        </div>
+              {/* Format */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Format
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="plain"
+                      checked={format === 'plain'}
+                      onChange={(e) => setFormat(e.target.value as 'plain' | 'html')}
+                      className="mr-2"
+                    />
+                    Plain Text
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="html"
+                      checked={format === 'html'}
+                      onChange={(e) => setFormat(e.target.value as 'plain' | 'html')}
+                      className="mr-2"
+                    />
+                    HTML
+                  </label>
+                </div>
+              </div>
 
-        {/* Output */}
-        {output && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Generated Text</h2>
+              {/* Start with Lorem */}
+              {style === 'classic' && (
+                <div className="mb-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={startWithLorem}
+                      onChange={(e) => setStartWithLorem(e.target.checked)}
+                      className="mr-2"
+                    />
+                    Start with "Lorem ipsum..."
+                  </label>
+                </div>
+              )}
+
               <button
-                onClick={copyToClipboard}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  copied
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                }`}
+                onClick={generateText}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
               >
-                {copied ? 'Copied!' : 'Copy to Clipboard'}
+                Generate Text
               </button>
             </div>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800">
-                {output}
-              </pre>
+          </div>
+
+          {/* Output */}
+          <div className="md:col-span-2">
+            <div className="bg-white rounded-lg shadow-md p-6 h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Generated Text</h2>
+                {output && (
+                  <div className="space-x-2">
+                    <button
+                      onClick={copyToClipboard}
+                      className={`px-4 py-2 rounded-md transition duration-200 ${
+                        copied 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                    <button
+                      onClick={downloadText}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200"
+                    >
+                      Download
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-gray-50 rounded-md p-4 min-h-[400px] max-h-[600px] overflow-y-auto">
+                {output ? (
+                  <pre className="whitespace-pre-wrap font-sans text-gray-700">{output}</pre>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    Click "Generate Text" to create Lorem Ipsum placeholder text
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* SEO Content */}
-        <div className="mt-12 prose max-w-none">
-          <h2 className="text-2xl font-semibold mb-4">About Lorem Ipsum</h2>
+        {/* Related Tools Section */}
+        <RelatedTools />
+
+        {/* Info Section */}
+        <div className="mt-12 bg-white rounded-lg shadow-md p-8">
+          <h2 className="text-2xl font-bold mb-4">About Lorem Ipsum</h2>
           <p className="text-gray-600 mb-4">
             Lorem Ipsum is placeholder text commonly used in the printing and typesetting industry. 
             It has been the industry's standard dummy text since the 1500s, when an unknown printer 
