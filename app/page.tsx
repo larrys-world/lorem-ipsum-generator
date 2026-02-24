@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { LoremIpsum } from 'lorem-ipsum'
 import RelatedTools from '@/components/RelatedTools'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 type GenerationType = 'paragraphs' | 'words' | 'sentences'
 type LoremStyle = 'classic' | 'hipster' | 'bacon'
@@ -114,6 +115,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <Breadcrumbs />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
