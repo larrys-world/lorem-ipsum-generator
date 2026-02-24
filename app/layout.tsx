@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Lorem Ipsum Generator - Free Placeholder Text Generator',
-  description: 'Generate Lorem Ipsum placeholder text instantly. Create paragraphs, words, or sentences. Multiple styles including classic, hipster, and bacon ipsum. Free online tool.',
+  description: 'Need placeholder text NOW? Generate Lorem Ipsum in 1 click. Choose paragraphs, words, or sentences. Classic, hipster & bacon styles. 100% free →',
   keywords: 'lorem ipsum, placeholder text, dummy text, lorem generator, ipsum generator, text generator',
   openGraph: {
     title: 'Lorem Ipsum Generator - Free Placeholder Text Generator',
