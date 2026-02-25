@@ -139,7 +139,35 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Breadcrumbs />
-      
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Lorem Ipsum Generator",
+            "description": "Generate placeholder text for your designs, mockups, and prototypes. Choose from classic Lorem Ipsum, Hipster Ipsum, or Bacon Ipsum.",
+            "url": "https://larrys-world.github.io/lorem-ipsum-generator/",
+            "applicationCategory": "UtilityApplication",
+            "operatingSystem": "Any",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "Generate Lorem Ipsum text",
+              "Choose paragraphs, words, or sentences",
+              "Multiple styles: Classic, Hipster, Bacon",
+              "Copy to clipboard",
+              "Download as text file",
+              "HTML formatting option"
+            ],
+            "screenshot": "https://larrys-world.github.io/lorem-ipsum-generator/og-image.png"
+          })
+        }}
+      />      
       {/* Header Ad */}
       <HeaderAd client={ADSENSE_CLIENT} slot={ADSENSE_SLOTS.header} />
       

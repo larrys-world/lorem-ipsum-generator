@@ -1,10 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LoremIpsum } from 'lorem-ipsum'
 import RelatedTools from '@/components/RelatedTools'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import FAQ from '@/components/FAQ'
+import { HeaderAd, FooterAd, InContentAd } from '@/components/monetization/AdSense'
+
+// AdSense configuration - replace with actual values when available
+const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX'
+const ADSENSE_SLOTS = {
+  header: 'XXXXXXXXXX',
+  footer: 'XXXXXXXXXX',
+  content: 'XXXXXXXXXX'
+}
 
 type GenerationType = 'paragraphs' | 'words' | 'sentences'
 type LoremStyle = 'classic' | 'hipster' | 'bacon'
@@ -32,6 +41,19 @@ export default function Home() {
   const [format, setFormat] = useState<'plain' | 'html'>('plain')
   const [output, setOutput] = useState('')
   const [copied, setCopied] = useState(false)
+
+  // Add AdSense script
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT
+    script.async = true
+    script.crossOrigin = 'anonymous'
+    document.head.appendChild(script)
+
+    return () => {
+      document.head.removeChild(script)
+    }
+  }, [])
 
   const generateText = () => {
     let words: string[] | undefined
@@ -117,6 +139,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Breadcrumbs />
+      
+      {/* Header Ad */}
+      <HeaderAd client={ADSENSE_CLIENT} slot={ADSENSE_SLOTS.header} />
+      
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -274,6 +300,9 @@ export default function Home() {
           </div>
         </div>
 
+        {/* In-Content Ad */}
+        <InContentAd client={ADSENSE_CLIENT} slot={ADSENSE_SLOTS.content} />
+
         {/* Related Tools Section */}
         <RelatedTools />
 
@@ -308,6 +337,9 @@ export default function Home() {
         <FAQ />
         </div>
       </div>
+      
+      {/* Footer Ad */}
+      <FooterAd client={ADSENSE_CLIENT} slot={ADSENSE_SLOTS.footer} />
     </main>
   )
 }
